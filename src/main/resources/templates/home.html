@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:mvc="http://www.springframework.org/schema/mvc">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
+
+    <title>Title</title>
+</head>
+<body>
+
+<button onclick="connect()">Connect</button>
+<input type="text" id="name">
+<button onclick="sendName()">Send</button>
+<p id="messages"></p>
+<script>
+
+    let stompClient = null;
+
+    function connect() {
+        let socket = new SockJS('/socketName');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('connected');
+
+            stompClient.subscribe('/chanelNameForListening', function (outputMassage) {
+                showGreeting(JSON.parse(outputMassage.body).outMessage);
+            })
+        });
+    }
+
+    function showGreeting(message) {
+        $('#messages').append(message + '<br>')
+    }
+
+    function sendName() {
+        stompClient.send("/allDestinationPrefix/msg", {}, JSON.stringify({name: $('#name').val()}));
+        console.log($('#name').val())
+    }
+
+</script>
+</body>
+</html>
